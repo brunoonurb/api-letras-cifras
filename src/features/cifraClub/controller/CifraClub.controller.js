@@ -1,4 +1,3 @@
-// const cheerio = require('cheerio')
 import * as cheerio from "cheerio";
 
 class CifraClubController {
@@ -8,34 +7,30 @@ class CifraClubController {
   }
 
   async bascarletraMusica(req, res) {
-
-    console.log('\n\n\n',"link");
+    console.log("\n\n\n", "link");
 
     try {
-      let { artista, musica } = req.params;
       let { link } = req.query;
 
-      console.log('\n\n\n',link);
+      link = link.replace(".html", "");
 
-      const artistaFormatado = artista.toLowerCase().replace(/\s+/g, "-");
-      const musicaFormatado = musica.toLowerCase().replace(/\s+/g, "-");
+      const resultadoDoHtml = await this.http.bascarletraMusica(link);
 
-      const resultadoDoHtml = await this.http.bascarletraMusica(
-        artistaFormatado,
-        musicaFormatado
-      );
+      if (!resultadoDoHtml) {
+        this.service.salvahtml(resultadoDoHtml, true, link);
 
+        return res.status(400).json("Não foi possível extrair letras");
+      }
+      this.service.salvahtml(resultadoDoHtml);
       const $ = cheerio.load(resultadoDoHtml);
       $(".tablatura").remove();
 
       const letraMusica = $("pre").html();
-      // console.log(letraMusica);
 
       const letrasFormatada = await this.service.formatarPadraoHolyrics(
         letraMusica
       );
 
-      // console.log("letrasFormatada", letrasFormatada);
       if (!letrasFormatada) {
         return res.status(400).json("Não foi possível extrair letras");
       }
@@ -59,27 +54,7 @@ class CifraClubController {
         badwords: false,
       };
 
-      console.log('\n\n\n',link);
       return res.status(200).json(resultado);
-      res.json();
-
-      return res.status(404).json({
-        message: "Nenhum usuário encontrado",
-      });
-
-      const usuarios = await this.http.bascarletraMusica();
-
-      // se não tivermos usuários para listar vamos retornar o status de
-      // erro 404 (NOT FOUND | NÃO ENCONTRADO), com a mensagem de nenhum usuário encontrado
-      if (!usuarios.length) {
-        res.status(404).json({
-          message: "Nenhum usuário encontrado",
-        });
-        return;
-      }
-
-      // retorna status de sucesso e a lista de usuários
-      res.status(200).json(usuarios);
     } catch (error) {
       res.status(400).json("Erro ao buscar musica");
     }
