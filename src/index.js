@@ -1,6 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
-import { CifraClubRoutes } from "./features/cifraClub/routes/Cifraclub.route.js";
+import { CifraClubRoutes } from "./features/cifraClub/routes/CifraClub.route.js";
 
 
 async function start() {
@@ -11,8 +11,8 @@ async function start() {
 
     app.use("/cifraclub", await CifraClubRoutes());
 
-    app.listen(3333, () => {
-      console.log("Serviço rodando na porta 3333");
+    app.listen(4000, () => {
+      console.log("Serviço rodando na porta 4000");
     });
   } catch (erro) {
     console.error("ocorreu um para iniciar o serviço", erro.message);
